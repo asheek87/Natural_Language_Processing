@@ -4,12 +4,10 @@ from nltk.tokenize import sent_tokenize
 from nltk.tokenize import RegexpTokenizer
 from nltk.util import ngrams
 from nltk.corpus import stopwords
+from nltk.stem.wordnet import WordNetLemmatizer
 import pandas as pd
 import re 
 import string
-
-
-
 
 class Document(object):
     '''
@@ -17,51 +15,109 @@ class Document(object):
     and preprocesses of an document
     '''
     __seperator='.'
-    __encoding='utf8'
 
-    def __init__(self,fileName,data):
+    def __init__(self,fileName,dataList):
         self.__saveDocID(fileName)
-        self.__contentList=data
-       
-        
+        self.__strContent=''.join(dataList).lower()
+        self.__lemmatizer = WordNetLemmatizer()
+
+    def getContent(self):
+         return self.__strContent
 
     def __saveDocID(self,file):
         fileName=file.split(Document.__seperator)
         self.__docID=fileName[0]
 
-    def contentToSentences(self):
-        strContent=''.join(self.__contentList)
-        self.__sentences=sent_tokenize(strContent)
+    def getDocID(self):
+        return self.__docID
+
+    def contentToSentences(self,contentList):
+        content=''.join(contentList)
+        self.__sentences=sent_tokenize(content)
+        return self.__sentences
     
-    def getSentences(self,outputPath,encode):
+    def removePunctuation(self,sentences):
+        self.__noPuncContent=[]
+        punctuation_tokenizer = RegexpTokenizer(r"\w+")
+        for aSentence in sentences:
+            self.__noPuncContent.append(punctuation_tokenizer.tokenize(aSentence))
+        return self.__noPuncContent
+    
+    def removeStopWords(self,sentences,stopwordsList):
+        self.__noStopWordsContent=[]
+        for aSentence in sentences:
+            sentence=[]
+            for aWord in aSentence:
+                if aWord not in stopwordsList:
+                    sentence.append(aWord)
+            self.__noStopWordsContent.append(sentence)       
+        return self.__noStopWordsContent
+    
+    def lemmatizeContent(self,sentences):
+        self.__lemmatizeContent=[]
+        for aSentence in sentences:
+            sentence=[]
+            for aWord in aSentence:
+                newWord=self.__lemmatizer .lemmatize(aWord) 
+                sentence.append(newWord)
+            self.__lemmatizeContent.append(sentence)
+        return self.__lemmatizeContent
+
+    def removeUnnecessaryWordsAndDigits(self,sentences):
         '''
+        Return a list of sentences 
+        
+        Sentences have 
+        1. no digits,
+        2. words which are at least 4 characters long
+        3. no empty sentences
+        '''
+        pattern1 = re.compile('\d+')
+        self.__necessaryContent=[]
+        for aSentence in sentences:
+            if len(aSentence) !=0:
+                sentence=[]
+                strSent=' '.join(aSentence)
+                noDigits = re.sub(pattern1,"", strSent)
+                for aWord in noDigits.split(" "):
+                    length=len(aWord)
+                    if length > 3:
+                        sentence.append(aWord)
+                self.__necessaryContent.append(sentence)
+
+        return self.__necessaryContent
+    
+    def setFinalizedContent(self,sentences):
+        for aSentence in sentences:
+            self.__preProcessedContent=" ".join(aSentence)
+        self.__preProcessedContent=self.__preProcessedContent.strip()
+        
+    def getFinalizedContent(self):
+        
+        return self.__preProcessedContent
+        
+    def generateReformattedDocument(self,outputPath,encode,sentences):
+        '''
+        Return: None
+
         Generate a file in txt format to 
-        list out all sentences line by line
+        list out all reformatted data line by line
         '''
         outF = open(outputPath+self.__docID+"_reformat.txt", "w",encoding=encode)
-        for line in self.__sentences:
-            # write line to output file
-            outF.write(line)
+        for aSentence in sentences:
+            aStr=" ".join(aSentence).strip()
+            outF.write(aStr)
             outF.write("\n")
-        outF.close()
-        
+        outF.close()  
 
-    def sentencesToNgrams(self,nGram=None):
-        # input: n gram value to tokenize the words in a sentence
-        self.__sentToNgramList = []
-        for s in self.__sentences:
-            word_tokens = word_tokenize(s)
-            ngram_list = list(ngrams(word_tokens,nGram))
-            self.__sentToNgramList.append(ngram_list)
+    def setDominantTopic(self,topic):
+        self.__topic=topic
 
-    def getNGramSentences(self):
-        # return: a list that contains a list of tokens
-        # print(self.__sentences)
-        # print ("number of sentences ", len(self.__sentences))
-        # print(self.__sentences[0])
-        return self.__sentToNgramList
+    def getDocumentLabel(self):
+        '''
+        Return: Document label 
+        '''
+        return self.__topic
 
-    def printOriginalContents(self):
-        
-        print(self.__contentList)
+
 
