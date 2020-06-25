@@ -81,7 +81,7 @@ class Document(object):
                 noDigits = re.sub(pattern1,"", strSent)
                 for aWord in noDigits.split(" "):
                     length=len(aWord)
-                    if length > 3:
+                    if length > 2:
                         sentence.append(aWord)
                 self.__necessaryContent.append(sentence)
 

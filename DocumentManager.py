@@ -119,6 +119,7 @@ class DocumentManager(object):
             noPuncContent=aDoc.removePunctuation(sentences)
             noStopWordContent=aDoc.removeStopWords(noPuncContent,self.__customizedStopWords)
             lemmatizeContent=aDoc.lemmatizeContent(noStopWordContent)
+            # cleanContent=lemmatizeContent=aDoc.lemmatizeContent(noStopWordContent)
             cleanContent=aDoc.removeUnnecessaryWordsAndDigits(lemmatizeContent)
             aDoc.setFinalizedContent(cleanContent)
             aDoc.generateReformattedDocument(DocumentManager.outputFolder,DocumentManager.__encoding,cleanContent)

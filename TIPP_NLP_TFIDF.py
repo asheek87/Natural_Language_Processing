@@ -5,6 +5,7 @@ from Analyser import Analyser
 import time as t
 import pandas as pd
 
+
 #%%
 #Create document manager obj
 docMan=DocumentManager()
@@ -26,43 +27,38 @@ print('Time taken for cleaning all corpus is {:.4f}'.format((end-start))+" secon
 modMan=ModelManager(docMan.getDocuments(),DocumentManager.random)
 #%%
 # Count Vectorize content using unigram
-df_countVect=modMan.countVectorizeContent(1,1)
+df_countVect=modMan.tfIDFVectorizeContent(1,1)
 df_countVect.head()
+# df_countVect.to_excel("output.xlsx")  
 #%%
 iterList=[10,15]
-componentListRange=[10,20]
+componentListRange=[5,10]
+topKterms=10
+
 start=t.time()
-df_resultFull=modMan.findBestParamAnd_LDAmodel(iterList,componentListRange)
+df_resultFull=modMan.findBestParamAnd_NMFmodel(iterList,componentListRange,topKterms)
 end=t.time()
 print('Time taken to find best LDA model is {:.4f}'.format((end-start))+" seconds")
 #%%
-# Display overall result on Log likelihood and Perplexity value
-print('Display overall result on Log likelihood and Perplexity value: ')
-df_resultFull.iloc[:,0:4]
+# Display overall result on coherencevalue
+print('Display overall result on coherence value: ')
+df_resultFull.iloc[:,0:3].T
 #%%
-# Display result with highest Log likelihood value
-print('Display result with highest Log likelihood value: ')
-df_resultFull[df_resultFull.Log_Likelihood == df_resultFull.Log_Likelihood.max()].iloc[:,0:4]
+# Display result with highest coherence value
+print('Display result with highest coherence value: ')
+df_resultFull[df_resultFull.Coherence == df_resultFull.Coherence.max()].iloc[:,0:3]
 
-#%%
-# Display result with lowest perplexity value
-print('Display result with lowest perplexity value: ')
-df_resultFull[df_resultFull.Perplexity == df_resultFull.Perplexity.min()].iloc[:,0:4] 
 
 # %%
 # Display overall result on the Dominant topic per document
 print('Display overall result on the Dominant topic per document: ')
-df_topic_doc, updateDocList=modMan.findDominantTopic('lda')
+df_topic_doc, updateDocList=modMan.findDominantTopic('nmf')
 docMan.updateDocListWithLable(updateDocList)
 df_topic_doc
 #%%
 # Display overall top K terms for each topic for analysis
 analyser=Analyser()
-analyser.displayAndSummarizeTopics_LDA(modMan.getCountVectorizer(),modMan.getLDAmodel(),20)
-#%%
-# Display overall result on the topics and terms using pyLDAvis for analysis
-panel=analyser.plt_pyLDAvis(modMan.getLDAmodel(),modMan.getCountVectorisedData(),modMan.getCountVectorizer())
-panel
+analyser.plot_top_term_weights(modMan,topKterms)
 
 #%%
 # Analyse the distibution of the target lable. 
@@ -72,7 +68,7 @@ analyser.distplotlabel(docMan.getDataLables(),"Dominant_Topic")
 #%%
 # Get the data and train the Classification model
 X_train, X_test, y_train, y_test = docMan.getTrainAndTestData(True)
-y_pred=modMan.trainAndPedict_NaiveBayesClassificationModel(X_train, X_test, y_train,modMan.getCountVectorizer() )
+y_pred=modMan.trainAndPedict_NaiveBayesClassificationModel(X_train, X_test, y_train,modMan.getTFIDFVectorizer() )
 #%% 
 # Evaluate model
 from sklearn import metrics
@@ -86,5 +82,5 @@ print("Recall:",metrics.recall_score(y_test, y_pred,average='weighted'))
 print(metrics.classification_report(y_test, y_pred))
 
 #%%
-modMan.saveVectorizerAndClassificationModel(DocumentManager.outputFolder,"CountVectorizer")
+modMan.saveVectorizerAndClassificationModel(DocumentManager.outputFolder,'TfidfVectorizer')
 #%%
