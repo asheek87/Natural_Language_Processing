@@ -48,8 +48,10 @@ class Document(object):
         for aSentence in sentences:
             sentence=[]
             for aWord in aSentence:
+                aWord=aWord.strip()
                 if aWord not in stopwordsList:
-                    sentence.append(aWord)
+                    if aWord not in sentence:
+                        sentence.append(aWord)
             self.__noStopWordsContent.append(sentence)       
         return self.__noStopWordsContent
     
@@ -58,7 +60,7 @@ class Document(object):
         for aSentence in sentences:
             sentence=[]
             for aWord in aSentence:
-                newWord=self.__lemmatizer .lemmatize(aWord) 
+                newWord=self.__lemmatizer.lemmatize(aWord) 
                 sentence.append(newWord)
             self.__lemmatizeContent.append(sentence)
         return self.__lemmatizeContent
@@ -78,7 +80,7 @@ class Document(object):
             if len(aSentence) !=0:
                 sentence=[]
                 strSent=' '.join(aSentence)
-                noDigits = re.sub(pattern1,"", strSent)
+                noDigits = re.sub(pattern1," ", strSent)
                 for aWord in noDigits.split(" "):
                     length=len(aWord)
                     if length > 2:

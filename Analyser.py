@@ -1,3 +1,13 @@
+'''
+Acknowledgement:
+Some codes are from 
+1) Derek Greene, University College Dubin
+   Original source: https://github.com/derekgreene/topic-model-tutorial
+
+2) Tan Poh Keam,Repulbic Polytechnic 
+   Source TIPP lab 01 to 08 
+'''
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pyLDAvis

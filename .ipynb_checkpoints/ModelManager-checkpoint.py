@@ -1,13 +1,3 @@
-'''
-Acknowledgement:
-Some codes are from 
-1) Derek Greene, University College Dubin
-   Original source: https://github.com/derekgreene/topic-model-tutorial
-
-2) Tan Poh Keam,Repulbic Polytechnic 
-   Source: TIPP lab 01 to 08 
-'''
-
 from sklearn.feature_extraction.text import CountVectorizer,TfidfVectorizer
 from sklearn.decomposition import LatentDirichletAllocation,NMF
 from sklearn.model_selection import train_test_split
